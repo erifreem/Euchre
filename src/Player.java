@@ -18,15 +18,11 @@ public class Player {
     }
 
     public void removeCard() {
-        for (int i = 0; i < 5; i++){
-            System.out.print((i + 1) + ": ");
-            System.out.print(hand.get(i).getRank());
-            System.out.println(hand.get(i).getSuit());
-        }
-        System.out.println("Which card would you like to discard?");
-        Scanner scan = new Scanner(System.in);
-        int choice = scan.nextInt();
-        hand.remove(choice - 1);
+        //printHand();
+        //System.out.println("Which card would you like to discard?");
+        //Scanner scan = new Scanner(System.in);
+        //int choice = scan.nextInt();
+        hand.remove(0);
     }
 
     public void addCard(Card faceUp) {
@@ -45,16 +41,23 @@ public class Player {
     }
 
     private Card humanPlay() {
-        for(int i = 0; i < hand.size(); i++){
-            int n = i+1;
-            System.out.println(n + ": " + hand.get(i).getSuit() + hand.get(i).getRank());
-        }
+        printHand();
+        System.out.println("Choose card to play: ");
         Scanner scan = new Scanner(System.in);
-        int choice = scan.nextInt();
+        int choice = scan.nextInt() - 1;
         return hand.remove(choice);
     }
 
     public char getTeam(){
         return team;
+    }
+
+    public void printHand() {
+        for (int i = 0; i < hand.size(); i++){
+            System.out.print((i + 1) + ": ");
+            System.out.print(hand.get(i).getRank());
+            System.out.println(hand.get(i).getSuit());
+        }
+
     }
 }

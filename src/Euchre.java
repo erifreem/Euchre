@@ -28,8 +28,10 @@ public class Euchre {
             Round r = new Round(order);
             int score = r.playRound();
             if (score > 0) {
+                System.out.println("Blue wins " + score + " points!");
                 blueScore += score;
             } else {
+                System.out.println("Orange wins " + (-1 *score) + " points!");
                 redScore -= score;
             }
             i++;

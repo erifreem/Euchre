@@ -18,13 +18,13 @@ public class Card {
     }
 
     public boolean compareCards(Card other, char trump, char lead){
-        return this.getPower(trump, lead) > other.getPower(trump, lead);
+        boolean b = this.getPower(trump, lead) > other.getPower(trump, lead);
+        return b;
     }
 
-    private int getPower(char trump, char lead) {
+    public int getPower(char trump, char lead) {
         if(this.isTrump(trump)){
             return this.trumpRank(trump);
-
         }
         if(this.suit == lead){
             return this.leadRank();
@@ -96,5 +96,41 @@ public class Card {
             return  trump == 'D';
         }
         return trump == 'S';
+    }
+
+    public void printCard(){
+        System.out.println(printRank() + " of " + printSuit());
+    }
+
+    public String printRank(){
+        if(rank == 'T'){
+            return "Ten";
+        }
+        if(rank == 'J'){
+            return "Jack";
+        }
+        if(rank == 'Q'){
+            return "Queen";
+        }
+        if(rank == 'K'){
+            return "King";
+        }
+        if(rank == 'A'){
+            return "Ace";
+        }
+        return "" + rank;
+    }
+
+    public String printSuit(){
+        if(suit == 'S'){
+            return  "Spades";
+        }
+        if(suit == 'H'){
+            return "Heart";
+        }
+        if(suit == 'C'){
+            return "Clubs";
+        }
+        return "diamonds";
     }
 }
