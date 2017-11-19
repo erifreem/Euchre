@@ -5,13 +5,19 @@ public class Player {
 
     private char type;
     private char team;
+    private String name;
 
     ArrayList<Card> hand = new ArrayList<>();
     ArrayList<Card> eligible = new ArrayList<>();
 
-    Player(char t, char te){
+    Player(char t, char te, String n){
         type = t;
         team = te;
+        name = n;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public char getType() {
@@ -30,18 +36,18 @@ public class Player {
         hand.add(faceUp);
     }
 
-    public Card playCard(char lead, int order, ArrayList<Card> trick, char trump, ArrayList<Card> played) {
+    public Card playCard(char lead, int order, ArrayList<Card> trick, char trump, ArrayList<Card> played) throws InterruptedException {
         if(type == 'h'){
             return humanPlay(lead);
         }
         return computerPlay(lead, order, trick, trump, played);
     }
 
-    private Card computerPlay(char lead, int order, ArrayList<Card> trick, char trump, ArrayList<Card> played) {
+    private Card computerPlay(char lead, int order, ArrayList<Card> trick, char trump, ArrayList<Card> played) throws InterruptedException {
         eligible.clear();
         Card play;
         if(order == 0){
-            eligible = hand;
+            eligible.addAll(hand);
             play = computerLeadOff(lead, trick, trump, played);
         } else if(order == 1){
             eligible = getEligible(hand, lead);
@@ -59,6 +65,7 @@ public class Player {
                 index = i;
             }
         }
+        Thread.sleep(1000);
         return hand.remove(index);
         
     }
@@ -77,6 +84,9 @@ public class Player {
             if(c.isLead(lead)){
                 eligible.add(c);
             }
+        }
+        if(eligible.isEmpty()){
+            eligible.addAll(hand);
         }
         return eligible;
     }
@@ -196,17 +206,19 @@ public class Player {
 
 
     private Card humanPlay(char lead) {
+        eligible = getEligible(hand, lead);
         boolean valid = false;
         int choice = 0;
         while (!valid){
+            System.out.println();
             printHand();
             System.out.println("Choose card to play: ");
             Scanner scan = new Scanner(System.in);
             choice = scan.nextInt() - 1;
-            if (hand.get(choice).isLead(lead)) {
+            if (eligible.contains(hand.get(choice))){
                 valid = true;
             } else {
-                System.out.print("You must follow suit!");
+                System.out.println("You must follow suit!");
             }
         }
         return hand.remove(choice);
@@ -222,6 +234,92 @@ public class Player {
             System.out.print(hand.get(i).printRank() + " of ");
             System.out.println(hand.get(i).printSuit());
         }
+        System.out.println();
 
+    }
+
+    public boolean trumpFirstRound(char suit) {
+        if(scoreHand(suit) > 22){
+            return true;
+        }
+        return false;
+    }
+
+    private int scoreHand(char trump) {
+        int score = 0;
+        for(Card c: hand){
+            score += scoreCard(c, trump);
+        }
+        return score;
+    }
+
+    private int scoreCard(Card c, char trump) {
+        if(c.isRight(trump)){
+            return 12;
+        }
+        if(c.isLeft(trump)){
+            return 10;
+        }
+        if(c.getSuit() == trump){
+            return c.trumpRank();
+        }
+        if(c.isAceOff(trump)){
+            return 7;
+        }
+        if(c.isKingOff(trump)){
+            return 4;
+        }
+        return 0;
+    }
+
+    public char trumpSecondRound(char suit) {
+        int spades = scoreHand('S');
+        int hearts = scoreHand('H');
+        int diamonds = scoreHand('D');
+        int clubs = scoreHand('C');
+        if(suit == 'S') {
+            spades = 1;
+        } else if(suit == 'H') {
+            hearts = 1;
+        } else if(suit == 'D') {
+            diamonds = 1;
+        } else{
+            clubs = 1;
+        }
+
+        int options[] = new int[4];
+        options[0] = spades;
+        options[1] = hearts;
+        options[2] = diamonds;
+        options[3] = clubs;
+
+        for(int i = 0; i < 4; i++){
+            boolean call = true;
+            if(options[i] < 20){
+                call = false;
+            }
+            for(int j = i + 1; j < i + 4; j++) {
+                if (options[i] < options[j % 4] * 2) {
+                    call = false;
+                }
+            }
+            if(call) {
+                return call(i);
+            }
+        }
+
+        return '\0';
+    }
+
+    private char call(int i) {
+        if (i == 0) {
+            return 'S';
+        } else if (i == 1) {
+            return 'H';
+        } else if (i == 2) {
+            return 'D';
+        } else {
+            return 'C';
+        }
     }
 }

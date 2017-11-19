@@ -130,11 +130,38 @@ public class Card {
             return  "Spades";
         }
         if(suit == 'H'){
-            return "Heart";
+            return "Hearts";
         }
         if(suit == 'C'){
             return "Clubs";
         }
         return "diamonds";
+    }
+
+    public boolean isAceOff(char trump) {
+        if(trump != this.getSuit() && 'A' == this.getRank()){
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isKingOff(char trump) {
+        if(trump != this.getSuit() && 'K' == this.getRank()){
+            return true;
+        }
+        return false;
+    }
+
+    public int trumpRank() {
+        if (rank == 'A'){
+            return 9;
+        }
+        if (rank == 'K'){
+            return 7;
+        }
+        if (rank == 'Q'){
+            return 6;
+        }
+        return 4;
     }
 }

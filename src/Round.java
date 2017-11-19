@@ -19,15 +19,21 @@ public class Round {
 
 
     public Round(ArrayList<Player> list) {
-        players = list;
+        players.addAll(list);
     }
-    public int playRound() {
+
+    public int playRound() throws InterruptedException {
         shuffleAndDeal();
         if(!firstRoundTrump()){
+            System.out.println();
+            Thread.sleep(1000);
             secondRoundTrump();
         }
+        Thread.sleep(1000);
+        System.out.println();
         int starter = 0;
         for(int i = 0; i < 5; i++) {
+            System.out.println("Trick " + (i+1) + ":");
            starter = playTrick(starter);
            trick.clear();
         }
@@ -36,6 +42,8 @@ public class Round {
 
 
     private int determineRoundWinner() {
+        System.out.println("Blue Team Tricks won: " + blueTricks);
+        System.out.println("Orange Team Tricks won: " + orangeTricks);
         if (blueTricks == 3 || blueTricks == 4) {
             if (caller == 'b') {
                 return 1;
@@ -57,17 +65,20 @@ public class Round {
         return 0;
     }
 
-    private int playTrick(int starter) {
+    private int playTrick(int starter) throws InterruptedException {
+        lead = '\0';
         for (int i = starter; i < starter + 4; i++){
             trick.add(players.get(i % 4).playCard(lead, i - starter, trick, trump, played));
             played.add(trick.get(trick.size()-1));
-            this.lead = trick.get(0).getSuit();
+            lead = trick.get(0).getSuit();
+            System.out.print(players.get(i%4).getName() + " played: ");
             trick.get(trick.size()-1).printCard();
         }
         return determineTrickWinner(starter);
     }
 
-    private int determineTrickWinner(int starter) {
+    private int determineTrickWinner(int starter) throws InterruptedException {
+        Thread.sleep(1000);
         int leader = 0;
         for(int i = 1; i < 4; i++){
             if(trick.get(i).compareCards(trick.get(leader), trump, lead)){
@@ -76,6 +87,7 @@ public class Round {
         }
         int winner = (leader + starter) % 4;
         printWinner(winner);
+        Thread.sleep(1000);
         if(players.get(winner).getTeam() == 'b'){
             blueTricks++;
         } else{
@@ -84,56 +96,61 @@ public class Round {
         return winner;
     }
 
-    private void printWinner(int lead) {
-        if(lead == 0){
-            System.out.println("Second chair wins!");
-        }
-        if(lead == 1){
-            System.out.println("Third chair wins!");
-        }
-        if(lead == 2){
-            System.out.println("Fourth chair wins!");
-        }
-        if(lead == 3){
-            System.out.println("Dealer wins!");
-        }
+    private void printWinner(int winner) {
+       System.out.println("\n" + players.get(winner).getName() + " wins! \n");
     }
 
 
-    private boolean secondRoundTrump() {
-        System.out.println("Everyone passed! You can now call any other suit as trump!");
+    private boolean secondRoundTrump() throws InterruptedException {
+        System.out.println("Everyone passed! You can now call any other suit as trump! \n");
         for(Player p: players){
+            Thread.sleep(1000);
             if(p.getType() == 'h') {
-                if(playerTrumpSecondRound(p)){
+                char t = playerTrumpSecondRound(p);
+                if(t != '\0'){
+                    trump = t;
+                    System.out.print("You declared: ");
+                    printTrump(trump);
+                    System.out.println(" as trump!" +"\n");
                     caller = p.getTeam();
                     return true;
-                };
+                } else{
+                    System.out.println("You passed!");
+                }
             } else{
-                if(computerTrumpSecondRound(p)){
-                 caller = p.getTeam();
-                 return true;
+                char t = computerTrumpSecondRound(p);
+                if(t != '\0') {
+                    trump = t;
+                    printTrump(trump);
+                    System.out.println(" is declared as trump!" + "\n");
+                    caller = p.getTeam();
+                    return true;
+                } else{
+                    System.out.println(p.getName() + "passed!");
                 }
             }
         }
         return false;
     }
 
-    private boolean computerTrumpSecondRound(Player p) {
-        return false;
+    private char computerTrumpSecondRound(Player p) {
+        return p.trumpSecondRound(faceUp.getSuit());
     }
 
-    private boolean playerTrumpSecondRound(Player p) {
+    private char playerTrumpSecondRound(Player p) {
         System.out.println("Would you like to declare trump?");
         char response = scan.next().charAt(0);
         if(response == 'n'){
-            return false;
+            return '\0';
         }
         System.out.println("What suit would you like to declare?");
-        trump = scan.next().charAt(0);
-        System.out.print("You declared: ");
-        printTrump(trump);
-        System.out.println(" as trump!");
-        return true;
+        char t = scan.next().charAt(0);
+        while (true) {
+            if (t != faceUp.getSuit() && (t == 'H' || t == 'S' || t == 'C' || t == 'D')) {
+                return t;
+            }
+            System.out.print("not a valid suit!");
+        }
     }
 
     private void printTrump(char trump) {
@@ -159,36 +176,42 @@ public class Round {
             if(p.getType() == 'c'){
                   if(cpuTrumpFirstRound(p)){
                       caller = p.getTeam();
+                      trump = faceUp.getSuit();
+                      printTrump(trump);
+                      System.out.println(" is now trump! \n" );
+                      players.get(3).addCard(faceUp);
+                      players.get(3).removeCard();
                       return true;
                   }
             } else{
                 if(playerTrumpFirstRound(p)){
                     caller = p.getTeam();
+                    trump = faceUp.getSuit();
+                    players.get(3).addCard(faceUp);
+                    players.get(3).removeCard();
+                    printTrump(trump);
+                    System.out.println(" is now trump! \n");
                     return true;
                 }
             }
+            System.out.println("Pass!");
         }
         return false;
 
     }
 
     private boolean playerTrumpFirstRound(Player p) {
-        System.out.println("Your hand:");
+        System.out.println("\n Your hand:");
         p.printHand();
         System.out.println("Call trump? (Y/N)");
         if(scan.next().equals("y")){
-            trump = faceUp.getSuit();
-            players.get(3).addCard(faceUp);
-            players.get(3).removeCard();
-            printTrump(trump);
-            System.out.println(" is now trump!");
             return true;
         }
         return false;
     }
 
     private boolean cpuTrumpFirstRound(Player p){
-        return false;
+       return p.trumpFirstRound(faceUp.getSuit());
     }
 
     private void shuffleAndDeal() {
