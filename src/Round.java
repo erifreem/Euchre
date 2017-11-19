@@ -7,11 +7,12 @@ public class Round {
 
     ArrayList<Card> deck = new ArrayList<>();
     ArrayList<Card> trick = new ArrayList<>();
+    ArrayList<Card> played = new ArrayList<>();
     ArrayList<Player> players = new ArrayList<>();
     Card faceUp;
     Scanner scan = new Scanner(System.in);
     char trump;
-    char lead;
+    char lead = '\0';
     char caller;
     int blueTricks = 0;
     int orangeTricks = 0;
@@ -27,8 +28,8 @@ public class Round {
         }
         int starter = 0;
         for(int i = 0; i < 5; i++) {
-            trick.clear();
            starter = playTrick(starter);
+           trick.clear();
         }
         return determineRoundWinner();
     }
@@ -58,7 +59,8 @@ public class Round {
 
     private int playTrick(int starter) {
         for (int i = starter; i < starter + 4; i++){
-            trick.add(players.get(i % 4).playCard());
+            trick.add(players.get(i % 4).playCard(lead, i - starter, trick, trump, played));
+            played.add(trick.get(trick.size()-1));
             this.lead = trick.get(0).getSuit();
             trick.get(trick.size()-1).printCard();
         }

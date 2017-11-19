@@ -73,16 +73,20 @@ public class Card {
         return 7;
     }
 
-    private boolean isLeft(char trump) {
+    public boolean isLeft(char trump) {
         return this.oppositeSuit(trump) && rank == 'J';
     }
 
-    private boolean isRight(char trump) {
+    public boolean isRight(char trump) {
         return this.suit == trump && this.rank == 'J';
     }
 
-    private boolean isTrump(char trump) {
-        return this.suit == trump || this.isLeft(trump);
+    public boolean isTrump(char trump) {
+        return this.suit == trump || this.isLeft(trump) || trump == '\0';
+    }
+
+    public boolean isLead(char lead) {
+        return lead == '\0' || this.suit == lead || this.isLeft(lead);
     }
 
     private boolean oppositeSuit(char trump) {

@@ -1,4 +1,8 @@
 import java.util.ArrayList;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+
 
 public class Euchre {
 
@@ -22,6 +26,7 @@ public class Euchre {
     private void play() {
         int i = 0;
         while (redScore < 10 && blueScore < 10) {
+            order.clear();
             for (int j = 0; i < 4; i++) {
                 order.add(players.get((i + j) % 4));
             }
@@ -44,10 +49,16 @@ public class Euchre {
 
     }
 
-    public static void main(String[] args){
-        Euchre game = new Euchre();
-        game.play();
+     public static void main(String[] args){
+            Euchre game = new Euchre();
+            game.play();
+     }
+
+
     }
 
 
-}
+
+
+
+
