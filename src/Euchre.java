@@ -1,15 +1,20 @@
 import java.util.ArrayList;
 
 
-
+/**
+ * Drive class for the game, contains the main method.
+ */
 public class Euchre {
 
 
-    ArrayList<Player> players = new ArrayList<>();
-    ArrayList<Player> order = new ArrayList<>();
-    int blueScore = 0;
-    int redScore = 0;
+    private ArrayList<Player> players = new ArrayList<>();
+    private ArrayList<Player> order = new ArrayList<>();
+    private int blueScore = 0;
+    private int orangeScore = 0;
 
+    /**
+     * initializes players
+     */
     Euchre(){
         Player p1 = new Player('h', 'b', "You");
         Player p2 = new Player('c', 'o', "Bob");
@@ -21,9 +26,13 @@ public class Euchre {
         players.add(p4);
     }
 
+    /**
+     * play Euchre
+     * @throws InterruptedException
+     */
     private void play() throws InterruptedException {
         int i = 0;
-        while (redScore < 10 && blueScore < 10) {
+        while (orangeScore < 10 && blueScore < 10) {
             order.clear();
             for (int j = 0; j < 4; j++) {
                 order.add(players.get((i + j) % 4));
@@ -31,16 +40,21 @@ public class Euchre {
             Round r = new Round(order);
             System.out.println("Round " + (i+1) + ": \n");
             int score = r.playRound();
+            Thread.sleep(1300);
             if (score > 0) {
                 System.out.println(" \n Blue wins " + score + " points! \n");
                 blueScore += score;
             } else {
-                System.out.println("Orange wins " + (-1 *score) + " points!");
-                redScore -= score;
+                System.out.println("\n Orange wins " + (-1 *score) + " points! \n");
+                orangeScore -= score;
             }
+            Thread.sleep(1500);
+            System.out.println("Blue Score: " + blueScore);
+            System.out.println("Orange Score: " + orangeScore + "\n");
             i++;
+            Thread.sleep(1200);
         }
-        if(blueScore > redScore){
+        if(blueScore > orangeScore){
             System.out.println("Blue wins!");
         } else {
             System.out.println("Red wins!");
@@ -48,6 +62,11 @@ public class Euchre {
 
     }
 
+    /**
+     * driver method
+     * @param args
+     * @throws InterruptedException
+     */
      public static void main(String[] args) throws InterruptedException {
             Euchre game = new Euchre();
             game.play();
