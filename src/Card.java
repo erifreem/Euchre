@@ -1,5 +1,5 @@
 /**
- * Each card in the game is represented as an object of this class.
+ * Each card in the game is represented as an object of this class
  */
 public class Card {
 
@@ -244,15 +244,15 @@ public class Card {
      */
     public int trumpRank() {
         if (rank == 'A'){
-            return 9;
-        }
-        if (rank == 'K'){
             return 7;
         }
-        if (rank == 'Q'){
-            return 6;
+        if (rank == 'K'){
+            return 5;
         }
-        return 4;
+        if (rank == 'Q'){
+            return 4;
+        }
+        return 3;
     }
 
     /**

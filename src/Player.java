@@ -148,7 +148,7 @@ public class Player {
         Card play;
         if(order == 0){
             eligible.addAll(hand);
-            play = computerLeadOff(lead, trick, trump, played);
+            play = computerLeadOff(lead, trump, played);
         } else if(order == 1){
             eligible = getEligible(hand, lead);
             play = computerSecondPlay(lead, trick, trump, played);
@@ -177,11 +177,86 @@ public class Player {
      * @return the card to be played
      */
     private Card computerFourthPlay(char lead, ArrayList<Card> trick, char trump) {
-        if (canWin(lead, trick, trump)){
+        if (!isWinning(lead, trick, trump) && canWin(lead, trick, trump)){
             return worstWinner(lead, trick, trump);
         }
         return getWorst(eligible, trump, lead);
-        //play worst card that will win
+    }
+
+    /**
+     * determines what card a CPU will play from the third spot
+     * @param lead the lead suit
+     * @param trick cards played so far
+     * @param trump the trump suit
+     * @param played cards played earlier in the round
+     * @return the card to be played
+     */
+    private Card computerThirdPlay(char lead, ArrayList<Card> trick, char trump, ArrayList<Card> played) {
+        if(!canWin(lead, trick, trump)){
+            return getWorst(eligible, trump, lead);
+        }
+        return best(lead, trump);
+    }
+
+    /**
+     * determines what card the CPU will play from the second spot
+     * @param lead the lead suit
+     * @param trick cards played so far
+     * @param trump the trump suit
+     * @param played cards played earlier in the round
+     * @return the card to be played
+     */
+    private Card computerSecondPlay(char lead, ArrayList<Card> trick, char trump, ArrayList<Card> played) {
+        if(!canWin(lead, trick, trump)){
+            return getWorst(eligible, trump, lead);
+        }
+        return worstWinner(lead, trick, trump);
+    }
+
+
+    /**
+     * determines what card the CPU will play from the lead off spot
+     * @param lead the lead suit
+     * @param trump the trump suit
+     * @param played cards played earlier in the round
+     * @return the card to be played
+     */
+    private Card computerLeadOff(char lead, char trump, ArrayList<Card> played) {
+        Card potential = topper(trump, played);
+        if(potential != null){
+            return potential;
+        }
+        potential = aceOff(trump);
+        if(potential != null){
+            return potential;
+        }
+        return getWorst(hand, trump, lead);
+    }
+
+    /**
+     * determines whether the current player's partner is leading the trick
+     * @param lead the lead suit
+     * @param trick the cards that have been played so far
+     * @param trump the trump suit
+     * @return true if the current player's partner is leading
+     */
+    private boolean isWinning(char lead, ArrayList<Card> trick, char trump) {
+
+        Card leader = getLeader(trick, trump, lead);
+        int i = 0;
+        int order = 0;
+        for(Card c : trick){
+            if(c == leader){
+                order = i;
+            }
+            i++;
+        }
+
+        if(trick.size() == 2){
+            return order == 0;
+        } else {
+            return order == 1;
+        }
     }
 
     /**
@@ -274,20 +349,7 @@ public class Player {
     }
 
 
-    /**
-     * determines what card a CPU will play from the third spot
-     * @param lead the lead suit
-     * @param trick cards played so far
-     * @param trump the trump suit
-     * @param played cards played earlier in the round
-     * @return the card to be played
-     */
-    private Card computerThirdPlay(char lead, ArrayList<Card> trick, char trump, ArrayList<Card> played) {
-        if(!canWin(lead, trick, trump)){
-            return getWorst(eligible, trump, lead);
-        }
-        return best(lead, trump);
-    }
+
 
     /**
      * determines the best eligible card in a player's hand
@@ -299,41 +361,7 @@ public class Player {
         return getLeader(eligible, trump, lead);
     }
 
-    /**
-     * determines what card the CPU will play from the second spot
-     * @param lead the lead suit
-     * @param trick cards played so far
-     * @param trump the trump suit
-     * @param played cards played earlier in the round
-     * @return the card to be played
-     */
-    private Card computerSecondPlay(char lead, ArrayList<Card> trick, char trump, ArrayList<Card> played) {
-        if(!canWin(lead, trick, trump)){
-            return getWorst(eligible, trump, lead);
-        }
-        return worstWinner(lead, trick, trump);
-    }
 
-    /**
-     * determines what card the CPU will play from the lead off spot
-     * @param lead the lead suit
-     * @param trick cards played so far
-     * @param trump the trump suit
-     * @param played cards played earlier in the round
-     * @return the card to be played
-     */
-    private Card computerLeadOff(char lead, ArrayList<Card> trick, char trump, ArrayList<Card> played) {
-        Card potential;
-        potential = topper(trump, played);
-        if(potential != null){
-            return potential;
-        }
-        potential = aceOff(trump);
-        if(potential != null){
-            return potential;
-        }
-        return getWorst(hand, trump, lead);
-    }
 
     /**
      * returns an ace off-suit card if the user has once
@@ -489,7 +517,7 @@ public class Player {
             return 12;
         }
         if(c.isLeft(trump)){
-            return 10;
+            return 9;
         }
         if(c.getSuit() == trump){
             return c.trumpRank();
@@ -498,7 +526,7 @@ public class Player {
             return 7;
         }
         if(c.isKingOff(trump)){
-            return 4;
+            return 2;
         }
         return 0;
     }
