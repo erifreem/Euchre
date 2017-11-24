@@ -1,5 +1,3 @@
-import org.omg.PortableInterceptor.INACTIVE;
-
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -128,7 +126,7 @@ public class Player {
      */
     public Card playCard(char lead, int order, ArrayList<Card> trick, char trump, ArrayList<Card> played) throws InterruptedException {
         if(type == 'h'){
-            return humanPlay(lead);
+            return humanPlay(lead, trump);
         }
         return computerPlay(lead, order, trick, trump, played);
     }
@@ -145,20 +143,28 @@ public class Player {
      */
     private Card computerPlay(char lead, int order, ArrayList<Card> trick, char trump, ArrayList<Card> played) throws InterruptedException {
         eligible.clear();
-        Card play;
+
         if(order == 0){
             eligible.addAll(hand);
+        } else {
+            eligible = getEligible(hand, lead, trump);
+        }
+
+        if(eligible.size() == 1){
+            return hand.remove(0);
+        }
+
+        Card play;
+        if(order == 0){
             play = computerLeadOff(lead, trump, played);
         } else if(order == 1){
-            eligible = getEligible(hand, lead);
             play = computerSecondPlay(lead, trick, trump, played);
         } else if(order == 2){
-            eligible = getEligible(hand, lead);
             play = computerThirdPlay(lead, trick, trump, played);
         } else{
-            eligible = getEligible(hand, lead);
             play = computerFourthPlay(lead, trick, trump);
         }
+
         int index = 0;
         for(int i = 0; i < hand.size(); i++){
             if(hand.get(i) == play){
@@ -166,7 +172,7 @@ public class Player {
             }
         }
         return hand.remove(index);
-        
+
     }
 
     /**
@@ -192,11 +198,71 @@ public class Player {
      * @return the card to be played
      */
     private Card computerThirdPlay(char lead, ArrayList<Card> trick, char trump, ArrayList<Card> played) {
+        // if you can't win, play worst card
         if(!canWin(lead, trick, trump)){
             return getWorst(eligible, trump, lead);
         }
-        return best(lead, trump);
+
+        //if your partner is winning, top them only with:
+        // 1. an off-suit Ace
+        // 2. a 9/10/Q of trump
+        if(isWinning(lead, trick, trump)){
+            Card leadCard = getLeader(trick, trump, lead);
+            if(leadCard.isLead(lead, trump) && !leadCard.isAceOff(trump) && aceLead(lead, trick, lead) != null){
+                return aceLead(lead, trick, lead);
+            }
+            if(leadCard.isLead(lead, trump) && !leadCard.isAceOff(trump) && breakLead(lead, trick, trump) != null){
+                char s = breakLead(lead, trick, trump).getRank();
+                if(s == 'T' || s == '9' || s == 'Q') {
+                    return breakLead(lead, trick, trump);
+                }
+            }
+            return getWorst(eligible, trump, lead);
+        }
+
+        Card potential;
+
+        //if partner is losing, there are 3 possible plays:
+        // 1. Ace of Lead Suit
+        // 2. Break Lead Suit with Trump
+        // 3. Play the Toppper
+        potential = aceLead(lead, trick, trump);
+        if(potential != null){
+            return potential;
+        }
+
+        potential = breakLead(lead, trick, trump);
+        if(potential != null){
+            return potential;
+        }
+
+        potential = topper(trump, played);
+        if(potential!= null){
+            return potential;
+        }
+
+        //if none of these options exist, play worst card
+        return getWorst(eligible, trump, lead);
     }
+
+    private Card breakLead(char lead, ArrayList<Card> trick, char trump) {
+        ArrayList<Card> leadBreakers = new ArrayList<>();
+        if(trick.get(0).isTrump(trump)){
+            return null;
+        }
+
+        Card leader = getLeader(trick, trump, lead);
+        for(Card c : eligible){
+            if(c.isTrump(trump) && c.compareCards(leader, trump, lead)){
+                leadBreakers.add(c);
+            }
+        }
+        if(leadBreakers.isEmpty()){
+            return null;
+        }
+        return getWorst(leadBreakers, trump, lead);
+    }
+
 
     /**
      * determines what card the CPU will play from the second spot
@@ -207,10 +273,33 @@ public class Player {
      * @return the card to be played
      */
     private Card computerSecondPlay(char lead, ArrayList<Card> trick, char trump, ArrayList<Card> played) {
+        //if you can't win, play worst card
         if(!canWin(lead, trick, trump)){
             return getWorst(eligible, trump, lead);
         }
-        return worstWinner(lead, trick, trump);
+        Card potential;
+
+        //if you can win, 3 option to consider:
+        // 1. play ace of lead suit
+        // 2. play low trump to break lead
+        // 3. play topper
+        potential = aceLead(lead, trick, trump);
+        if(potential != null){
+            return potential;
+        }
+        potential = breakLead(lead, trick, trump);
+        if(potential != null){
+            if(potential.getSuit() == 'T' || potential.getSuit() == '9' || potential.getSuit() == 'Q') {
+                return potential;
+            }
+        }
+        potential = topper(trump, played);
+        if(potential!= null){
+            return potential;
+        }
+
+        //if these options don't exist, play worst
+        return getWorst(eligible, trump, lead);
     }
 
 
@@ -231,6 +320,19 @@ public class Player {
             return potential;
         }
         return getWorst(hand, trump, lead);
+    }
+
+    private Card aceLead(char lead, ArrayList<Card> trick, char trump) {
+        Card ace = null;
+        for(Card c: eligible){
+            if(c.getRank() == 'A' && c.getSuit() == lead){
+                ace = c;
+            }
+        }
+        if(ace != null && ace.compareCards(getLeader(trick, trump, lead), trump, lead)){
+            return ace;
+        }
+        return null;
     }
 
     /**
@@ -266,10 +368,10 @@ public class Player {
      * @param lead the lead suit
      * @return the cards that are eligible to be played
      */
-    private ArrayList<Card> getEligible(ArrayList<Card> hand, char lead) {
+    private ArrayList<Card> getEligible(ArrayList<Card> hand, char lead, char trump) {
         ArrayList<Card> eligible = new ArrayList<>();
         for(Card c: hand){
-            if(c.isLead(lead)){
+            if(c.isLead(lead, trump)){
                 eligible.add(c);
             }
         }
@@ -299,19 +401,40 @@ public class Player {
 
     /**
      * determines the worst card out of a group of cards
-     * @param winners a group of cards
+     * @param options a group of cards
      * @param trump the trump suit
      * @param lead the lead suit
      * @return the worst card in winners
      */
-    private Card getWorst(ArrayList<Card> winners, char trump, char lead) {
-        Card loser = winners.get(0);
-        for(Card c : winners){
+    private Card getWorst(ArrayList<Card> options, char trump, char lead) {
+        if(loner(options, trump) != null){
+            return loner(options, trump);
+        }
+
+        Card loser = options.get(0);
+        for(Card c : options){
             if(!c.compareCards(loser, trump, lead)){
                 loser = c;
             }
         }
         return loser;
+    }
+
+    private Card loner(ArrayList<Card> eligible, char trump) {
+        for(Card c: eligible){
+            boolean pair = false;
+            ArrayList<Card> others = eligible;
+            others.remove(c);
+            for(Card o: others){
+                if(c.isSameSuit(o, trump)){
+                    pair = true;
+                }
+            }
+            if(pair == false && c.getRank() != 'K' && c.getRank() == 'A' && !c.isTrump(trump)){
+                return c;
+            }
+        }
+        return null;
     }
 
     /**
@@ -431,8 +554,8 @@ public class Player {
      * @param lead the lead suit
      * @return the card to be played
      */
-    private Card humanPlay(char lead) throws InterruptedException {
-        eligible = getEligible(hand, lead);
+    private Card humanPlay(char lead, char trump) throws InterruptedException {
+        eligible = getEligible(hand, lead, trump);
         boolean valid = false;
         int choice = 0;
         while (!valid){
@@ -487,7 +610,7 @@ public class Player {
      * @return true if CPU decides to call trump
      */
     public boolean trumpFirstRound(char suit) {
-        if(scoreHand(suit) > 22){
+        if(scoreHand(suit) > 21 && handsDownTheBest('\0') == suit){
             return true;
         }
         return false;
@@ -526,9 +649,35 @@ public class Player {
             return 7;
         }
         if(c.isKingOff(trump)){
-            return 2;
+            return 1;
         }
         return 0;
+    }
+
+    /**
+     * determines if one trump suit would be twice as good as any other suit for this hand
+     * @param suit the suit of the faceUp card
+     * @return the suit being called trump, or the null character for a pass
+     */
+    public char handsDownTheBest(char suit) {
+        int options[] = scoreSuits(suit);
+
+        for(int i = 0; i < 4; i++){
+            boolean call = true;
+            if(options[i] < 20){
+                call = false;
+            }
+            for(int j = i + 1; j < i + 4; j++) {
+                if (options[i] < options[j % 4] + 6) {
+                    call = false;
+                }
+            }
+            if(call) {
+                return call(i);
+            }
+        }
+
+        return '\0';
     }
 
     /**
@@ -539,15 +688,22 @@ public class Player {
     public char trumpSecondRound(char suit) {
         int options[] = scoreSuits(suit);
 
+        if(allWorkWell(options)){
+            return '\0';
+        }
+
         for(int i = 0; i < 4; i++){
             boolean call = true;
             if(options[i] < 20){
                 call = false;
             }
             for(int j = i + 1; j < i + 4; j++) {
-                if (options[i] < options[j % 4] * 2) {
+                if (options[i] < options[j % 4]) {
                     call = false;
                 }
+            }
+            if(options[i] < 22){
+                call = false;
             }
             if(call) {
                 return call(i);
@@ -555,6 +711,22 @@ public class Player {
         }
 
         return '\0';
+    }
+
+    private boolean allWorkWell(int[] options) {
+        int count = 0;
+        for(int i: options) {
+            if(i > 27){
+                return false;
+            }
+            if(i >= 15){
+                count++;
+            }
+        }
+        if(count >= 3){
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -581,21 +753,21 @@ public class Player {
      * @return suit to be called
      */
     public char cpuStickTheDealer(char suit) {
-            int options[] = scoreSuits(suit);
+        int options[] = scoreSuits(suit);
 
-            for(int i = 0; i < 4; i++){
-                boolean call = true;
-                for(int j = i + 1; j < i + 4; j++) {
-                    if (options[i] < options[j % 4]) {
-                        call = false;
-                    }
-                }
-                if(call) {
-                    return call(i);
+        for(int i = 0; i < 4; i++){
+            boolean call = true;
+            for(int j = i + 1; j < i + 4; j++) {
+                if (options[i] < options[j % 4]) {
+                    call = false;
                 }
             }
-            return 'S';
+            if(call) {
+                return call(i);
+            }
         }
+        return 'S';
+    }
 
     /**
      * scores the value of player's hand against each suit

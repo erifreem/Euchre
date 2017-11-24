@@ -144,8 +144,8 @@ public class Card {
      * @param lead the lead suit
      * @return true if the card follows the lead suit
      */
-    public boolean isLead(char lead) {
-        return lead == '\0' || this.suit == lead || this.isLeft(lead);
+    public boolean isLead(char lead, char trump) {
+        return lead == '\0' || this.suit == lead && !this.isLeft(trump);
     }
 
     /**
@@ -312,5 +312,15 @@ public class Card {
             return 6;
         }
         return 5;
+    }
+
+    public boolean isSameSuit(Card o, char trump) {
+        if(this.isTrump(trump)){
+            return o.isTrump(trump);
+        }
+        if(o.isTrump(trump)){
+            return false;
+        }
+        return o.getSuit() == this.getSuit();
     }
 }
