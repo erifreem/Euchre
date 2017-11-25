@@ -655,7 +655,7 @@ public class Player {
     }
 
     /**
-     * determines if one trump suit would be twice as good as any other suit for this hand
+     * determines if one trump suit would be way better than any other suit for this hand
      * @param suit the suit of the faceUp card
      * @return the suit being called trump, or the null character for a pass
      */
@@ -664,9 +664,6 @@ public class Player {
 
         for(int i = 0; i < 4; i++){
             boolean call = true;
-            if(options[i] < 20){
-                call = false;
-            }
             for(int j = i + 1; j < i + 4; j++) {
                 if (options[i] < options[j % 4] + 6) {
                     call = false;
