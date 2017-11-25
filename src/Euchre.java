@@ -41,11 +41,15 @@ public class Euchre {
             System.out.println("Round " + (i+1) + ": \n");
             int score = r.playRound();
             Thread.sleep(1300);
+            String message = " points!";
+            if(Math.abs(score) == 1){
+                message = " point!";
+            }
             if (score > 0) {
-                System.out.println(" \n Blue wins " + score + " points! \n");
+                System.out.println(" \nBlue wins " + score + message + "\n");
                 blueScore += score;
             } else {
-                System.out.println("\n Orange wins " + (-1 *score) + " points! \n");
+                System.out.println("\nOrange wins " + (-1 *score) + message + "\n");
                 orangeScore -= score;
             }
             Thread.sleep(1500);

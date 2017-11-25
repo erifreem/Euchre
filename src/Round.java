@@ -98,7 +98,7 @@ public class Round {
         for (int i = starter; i < starter + 4; i++){
             trick.add(players.get(i % 4).playCard(lead, i - starter, trick, trump, played));
             played.add(trick.get(trick.size()-1));
-            lead = trick.get(0).getSuit();
+            lead = trick.get(0).getSuit(trump);
             System.out.print(players.get(i%4).getName() + " played: ");
             trick.get(trick.size()-1).printCard();
             Thread.sleep(1200);
@@ -158,7 +158,7 @@ public class Round {
                 char t = playerTrumpSecondRound(p);
                 if(t != '\0'){
                     trump = t;
-                    System.out.print("You declared: ");
+                    System.out.print("You declared ");
                     printTrump(trump);
                     System.out.println(" as trump!" +"\n");
                     caller = p.getTeam();
@@ -232,6 +232,7 @@ public class Round {
      */
     private char playerTrumpSecondRound(Player p) {
         while (true) {
+            p.printHand();
             System.out.println("Would you like to declare trump?");
             char response = scan.next().charAt(0);
             if (response == 'n') {
@@ -319,7 +320,6 @@ public class Round {
      * @return true if trump was called, else false
      */
     private boolean playerTrumpFirstRound(Player p) {
-        System.out.println("\n Your hand:");
         p.printHand();
         while (true) {
             System.out.println("Call trump? (y/n)");

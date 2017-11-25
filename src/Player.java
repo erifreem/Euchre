@@ -150,19 +150,19 @@ public class Player {
             eligible = getEligible(hand, lead, trump);
         }
 
-        if(eligible.size() == 1){
-            return hand.remove(0);
-        }
-
         Card play;
-        if(order == 0){
-            play = computerLeadOff(lead, trump, played);
-        } else if(order == 1){
-            play = computerSecondPlay(lead, trick, trump, played);
-        } else if(order == 2){
-            play = computerThirdPlay(lead, trick, trump, played);
-        } else{
-            play = computerFourthPlay(lead, trick, trump);
+        if(eligible.size() == 1){
+            play = eligible.remove(0);
+        } else {
+            if (order == 0) {
+                play = computerLeadOff(lead, trump, played);
+            } else if (order == 1) {
+                play = computerSecondPlay(lead, trick, trump, played);
+            } else if (order == 2) {
+                play = computerThirdPlay(lead, trick, trump, played);
+            } else {
+                play = computerFourthPlay(lead, trick, trump);
+            }
         }
 
         int index = 0;
@@ -423,7 +423,8 @@ public class Player {
     private Card loner(ArrayList<Card> eligible, char trump) {
         for(Card c: eligible){
             boolean pair = false;
-            ArrayList<Card> others = eligible;
+            ArrayList<Card> others = new ArrayList<>();
+            others.addAll(eligible);
             others.remove(c);
             for(Card o: others){
                 if(c.isSameSuit(o, trump)){
@@ -595,6 +596,7 @@ public class Player {
      * prints the player's current hand
      */
     public void printHand() {
+        System.out.println("\n Your hand:");
         for (int i = 0; i < hand.size(); i++){
             System.out.print((i + 1) + ": ");
             System.out.print(hand.get(i).printRank() + " of ");

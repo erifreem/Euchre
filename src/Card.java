@@ -136,7 +136,7 @@ public class Card {
      * @return true if the card is a trump card
      */
     public boolean isTrump(char trump) {
-        return this.suit == trump || this.isLeft(trump) || trump == '\0';
+        return this.suit == trump || this.isLeft(trump);
     }
 
     /**
@@ -145,7 +145,10 @@ public class Card {
      * @return true if the card follows the lead suit
      */
     public boolean isLead(char lead, char trump) {
-        return lead == '\0' || this.suit == lead && !this.isLeft(trump);
+        if(lead == trump){
+            return this.isTrump(trump);
+        }
+        return (this.suit == lead && !this.isLeft(trump));
     }
 
     /**
@@ -322,5 +325,12 @@ public class Card {
             return false;
         }
         return o.getSuit() == this.getSuit();
+    }
+
+    public char getSuit(char trump) {
+        if(this.isTrump(trump)){
+            return trump;
+        }
+        return this.suit;
     }
 }
