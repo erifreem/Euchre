@@ -205,13 +205,17 @@ public class Round {
 
     private char humanStickTheDealer(Player p) {
             System.out.println("What suit would you like to declare? You cannot pass.");
-            char t = scan.next().charAt(0);
             while (true) {
+                char t = scan.next().charAt(0);
+                t = Character.toUpperCase(t);
                 if (t != faceUp.getSuit() && (t == 'H' || t == 'S' || t == 'C' || t == 'D')) {
                     System.out.println("");
                     return t;
                 }
-                System.out.print("not a valid suit!");
+                System.out.println("not a valid suit!");
+                if(t == faceUp.getSuit()){
+                    System.out.println("You cannot choose the suit of the face up card");
+                }
             }
         }
 
@@ -248,6 +252,9 @@ public class Round {
                         return t;
                     }
                     System.out.println("not a valid suit! enter H/S/C/D (capital)");
+                    if(t == faceUp.getSuit()){
+                        System.out.println("You cannot choose the suit of the face up card");
+                    }
                 }
             } else {
                 System.out.println("invalid input! enter 'y' or 'n'!");
