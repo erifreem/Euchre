@@ -242,6 +242,7 @@ public class Round {
                 while (true) {
                     System.out.println("What suit would you like to declare? (H/S/C/D)");
                     char t = scan.next().charAt(0);
+                    t = Character.toUpperCase(t);
                     if (t != faceUp.getSuit() && (t == 'H' || t == 'S' || t == 'C' || t == 'D')) {
                         System.out.println();
                         return t;
