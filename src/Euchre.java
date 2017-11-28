@@ -61,7 +61,7 @@ public class Euchre {
         if(blueScore > orangeScore){
             System.out.println("Blue wins!");
         } else {
-            System.out.println("Red wins!");
+            System.out.println("Orange wins!");
         }
 
     }

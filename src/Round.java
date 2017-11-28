@@ -170,7 +170,7 @@ public class Round {
                 char t = computerTrumpSecondRound(p);
                 if(t != '\0') {
                     trump = t;
-                    System.out.println(p.getName() + "has called");
+                    System.out.print(p.getName() + " has called ");
                     printTrump(trump);
                     System.out.println(" as trump!" + "\n");
                     caller = p.getTeam();
@@ -290,7 +290,7 @@ public class Round {
                       System.out.print(p.getName() + " calls! ");
                       printTrump(trump);
                       System.out.println(" is now trump! \n" );
-                      Thread.sleep(1000);
+                      Thread.sleep(1300);
                       players.get(3).addCard(faceUp);
                       players.get(3).removeCard(trump);
                       return true;
@@ -303,7 +303,7 @@ public class Round {
                     players.get(3).removeCard(trump);
                     printTrump(trump);
                     System.out.println( " is now trump! \n");
-                    Thread.sleep(1000);
+                    Thread.sleep(1300);
                     return true;
                 }
             }
@@ -343,7 +343,7 @@ public class Round {
      * @return true if trump was called, else false
      */
     private boolean cpuTrumpFirstRound(Player p){
-       return p.trumpFirstRound(faceUp.getSuit());
+       return p.trumpFirstRound(faceUp.getSuit(), faceUp);
     }
 
     /**

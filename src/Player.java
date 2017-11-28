@@ -611,10 +611,13 @@ public class Player {
      * @param suit the facUp card's suit
      * @return true if CPU decides to call trump
      */
-    public boolean trumpFirstRound(char suit) {
+    public boolean trumpFirstRound(char suit, Card faceUp) {
+        hand.add(faceUp);
         if(scoreHand(suit) > 21 && handsDownTheBest('\0') == suit){
+            hand.remove(faceUp);
             return true;
         }
+        hand.remove(faceUp);
         return false;
     }
 
