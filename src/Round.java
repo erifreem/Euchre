@@ -344,7 +344,10 @@ public class Round {
      * @return true if trump was called, else false
      */
     private boolean cpuTrumpFirstRound(Player p){
-       return p.trumpFirstRound(faceUp.getSuit(), faceUp);
+       if(players.indexOf(p) == 1 || players.indexOf(p) == 3) {
+           return p.trumpFirstRound(faceUp.getSuit(), faceUp);
+       }
+       return p.trumpFirstRound(faceUp.getSuit());
     }
 
     /**

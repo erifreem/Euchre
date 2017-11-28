@@ -621,6 +621,13 @@ public class Player {
         return false;
     }
 
+    public boolean trumpFirstRound(char suit){
+        if(scoreHand(suit) > 21 && handsDownTheBest('\0') == suit){
+            return true;
+        }
+        return false;
+    }
+
     /**
      * determines the overall value of a player's hand given a certain trump suit/
      * @param trump a given trump suit
