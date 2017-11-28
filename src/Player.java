@@ -8,23 +8,23 @@ import java.util.Scanner;
  */
 public class Player {
 
-    private char type;
-    private char team;
-    private String name;
+    private final char type;
+    private final char team;
+    private final String name;
 
     private ArrayList<Card> hand = new ArrayList<>();
     private ArrayList<Card> eligible = new ArrayList<>();
 
     /**
      * initializes player at start of game
-     * @param t type of player (human or computer)
-     * @param te team player is on (orange of blue)
-     * @param n name of player
+     * @param type type of player (human or computer)
+     * @param team team player is on (orange of blue)
+     * @param name name of player
      */
-    Player(char t, char te, String n){
-        type = t;
-        team = te;
-        name = n;
+    Player(char type, char team, String name){
+        this.type = type;
+        this.team = team;
+        this.name = name;
     }
 
     /**
